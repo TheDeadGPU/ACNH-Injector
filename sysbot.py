@@ -104,11 +104,3 @@ class Utility(_Section):
 
     def title_id(self) -> str:
         return self._bot._query("getTitleID")
-
-
-if __name__ == "__main__":
-    with SysBot("192.168.1.50") as bot:  # your Switch's IP
-        print(hex(bot.Utility.heap_base()))
-        print(bot.Ram.peek(0x45075880, 16).hex())
-        bot.Ram.poke(0x45075880, bytes.fromhex("DEADBEEF"))
-        bot.Controls.click("A")

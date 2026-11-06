@@ -1,14 +1,5 @@
 from sysbot_acnh import ACNHInjector
 
-import argparse
-import socket
-import struct
-import sys
-
-SWITCH_IP = "192.168.12.115"
-PORT = 6000
-TIMEOUT = 5.0
-
 item_hex_codes = [
     0x011F,  # slot 1: exercise bike
     0x0122,  # slot 2: treadmill
@@ -52,8 +43,83 @@ item_hex_codes = [
     0x21FE,  # slot 40: sphinx
 ]
 
-with ACNHInjector(SWITCH_IP, PORT, TIMEOUT) as injector:
-    injector.wipe_player_inventory(1)
-    #injector.inject_items(1, item_hex_codes)
-    #injector.inject_items(1,item_hex_codes)
-    #injector.fill_inventory_with_item(1, 0x3604)
+def is_valid_ipv4(ip_str):
+  # Split the string by dots
+  parts = ip_str.split(".")
+
+  # An IPv4 address must have exactly 4 octets
+  if len(parts) != 4:
+    return False
+
+  for part in parts:
+    # Check if the part is a number (only digits) and not empty
+    if not part.isdigit():
+      return False
+
+    # Prevent leading zeros (e.g., "192.168.01.1" is technically invalid standard form)
+    if len(part) > 1 and part[0] == "0":
+      return False
+
+    # Convert to integer and check if it's between 0 and 255
+    num = int(part)
+    if not (0 <= num <= 255):
+      return False
+
+  return True
+
+
+def get_ip_address():
+  while True:
+    user_input = input("Please enter your Nintendo Switch IPv4 address: ").strip()
+
+    if is_valid_ipv4(user_input):
+      return user_input
+    else:
+      print(
+          "Invalid IP address format. Ensure it's in the format X.X.X.X (0-255"
+          " per section).\n"
+      )
+
+def get_player_index():
+  while True:
+    user_input = input("Please enter a player index from 1 to 8: ").strip()
+
+    try:
+      # Convert input string to an integer
+      number = int(user_input)
+
+      # Check if the number is within the allowed range
+      if 1 <= number <= 8:
+        return number
+      else:
+        print(
+            "Out of range! The player index must be between 1 and 8. Please try"
+            " again.\n"
+        )
+
+    except ValueError:
+      # Catches cases where the user types letters or symbols instead of digits
+      print("Invalid input. Please enter a valid whole number.\n")
+
+def ascii_header():
+    header = r"""
+   db    .d88b 8b  8 8   8    888 8b  8  8888 8888 .d88b 88888 .d88b. 888b. 
+  dPYb   8P    8Ybm8 8www8     8  8Ybm8    8  8www 8P      8   8P  Y8 8  .8 
+ dPwwYb  8b    8  "8 8   8     8  8  "8 w  8  8    8b      8   8b  d8 8wwK' 
+dP    Yb `Y88P 8   8 8   8    888 8   8 `Yw"  8888 `Y88P   8   `Y88P' 8  Yb 
+                                                                            
+  """
+    print(header)
+
+if __name__ == "__main__":
+    ascii_header()
+    IP = get_ip_address()
+    PORT = 6000
+    TIMEOUT = 5.0
+    PLAYER_INDEX = get_player_index()
+    with ACNHInjector(IP, PORT, TIMEOUT) as injector:
+        #injector.wipe_player_inventory(1)
+        injector.inject_items(PLAYER_INDEX, item_hex_codes)
+        #injector.inject_items(1,item_hex_codes)
+        #injector.fill_inventory_with_item(1, 0x3604)
+
