@@ -39,7 +39,7 @@ Before using this project, you need:
 
 ## Usage
 
-Run the CLI:
+Run the interactive CLI:
 
 ```bash
 python main.py
@@ -47,9 +47,18 @@ python main.py
 
 The program will prompt for:
 
-- The target Nintendo Switch IPv4 address
-- The player index (1-8)
-- Whether to inject the predefined item batch, preview the batch, or wipe inventory
+- the target Nintendo Switch IPv4 address
+- the player index (1-8)
+- whether to inject the predefined item batch, preview the batch, or wipe inventory
+
+You can also run non-interactive commands:
+
+```bash
+python main.py --ip 192.168.1.10 --player 1 --inject 0x011F 0x0122 0x014A
+python main.py --ip 192.168.1.10 --player 1 --wipe
+python main.py --ip 192.168.1.10 --player 1 --fill 0x011F
+python main.py --preview
+```
 
 ## Example behavior
 
