@@ -101,6 +101,43 @@ def get_player_index():
       # Catches cases where the user types letters or symbols instead of digits
       print("Invalid input. Please enter a valid whole number.\n")
 
+
+def show_items():
+    print("\nItems in the standard batch:")
+    for slot, item in enumerate(item_hex_codes, start=1):
+        print(f"  {slot:2}. {item:#06x}")
+    print()
+
+
+def get_menu_choice():
+    while True:
+        print("1. Inject the standard 40-item batch")
+        print("2. Preview the item batch")
+        print("3. Wipe a player's inventory")
+        print("0. Exit")
+        choice = input("Choose an option: ").strip()
+        if choice in {"0", "1", "2", "3"}:
+            return choice
+        print("Invalid option. Enter 1, 2, 3, or 0.\n")
+
+
+def confirm_injection():
+    while True:
+        answer = input("Inject these items now? [y/N]: ").strip().lower()
+        if answer in {"y", "yes"}:
+            return True
+        if answer in {"", "n", "no"}:
+            return False
+        print("Please enter y or n.\n")
+
+
+def confirm_wipe():
+    answer = input(
+        "This clears all 40 inventory slots. Type WIPE to confirm: "
+    ).strip()
+    return answer == "WIPE"
+
+
 def ascii_header():
     header = r"""
    db    .d88b 8b  8 8   8    888 8b  8  8888 8888 .d88b 88888 .d88b. 888b. 
@@ -113,13 +150,33 @@ dP    Yb `Y88P 8   8 8   8    888 8   8 `Yw"  8888 `Y88P   8   `Y88P' 8  Yb
 
 if __name__ == "__main__":
     ascii_header()
-    IP = get_ip_address()
-    PORT = 6000
-    TIMEOUT = 5.0
-    PLAYER_INDEX = get_player_index()
-    with ACNHInjector(IP, PORT, TIMEOUT) as injector:
-        #injector.wipe_player_inventory(1)
-        injector.inject_items(PLAYER_INDEX, item_hex_codes)
-        #injector.inject_items(1,item_hex_codes)
-        #injector.fill_inventory_with_item(1, 0x3604)
+    while True:
+        choice = get_menu_choice()
+        if choice == "0":
+            print("Goodbye.")
+            break
+        if choice == "2":
+            show_items()
+            continue
 
+        ip = get_ip_address()
+        player_index = get_player_index()
+        if choice == "1":
+            show_items()
+            print(f"Ready to inject {len(item_hex_codes)} items into player {player_index} at {ip}.")
+            if not confirm_injection():
+                print("Injection cancelled.\n")
+                continue
+
+            with ACNHInjector(ip, 6000, 5.0) as injector:
+                injector.inject_items(player_index, item_hex_codes)
+            print("Injection complete.\n")
+        elif choice == "3":
+            print(f"Ready to wipe player {player_index}'s inventory at {ip}.")
+            if not confirm_wipe():
+                print("Wipe cancelled.\n")
+                continue
+
+            with ACNHInjector(ip, 6000, 5.0) as injector:
+                injector.wipe_player_inventory(player_index)
+            print("Inventory wiped.\n")
